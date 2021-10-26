@@ -12,11 +12,15 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
+import java.util.HashMap;
 
 public class RegisterActivity extends AppCompatActivity {
     private AppCompatButton mCreateAccountButton;
@@ -55,8 +59,7 @@ public class RegisterActivity extends AppCompatActivity {
         if (TextUtils.isEmpty(mPhoneNumber)) {
             mInputPhoneNumber.setError("Please, Enter your Phone Number");
             accountInfoPassed = false;
-        }
-        else if (mPhoneNumber.length() < 10) {
+        } else if (mPhoneNumber.length() < 10) {
             mInputPhoneNumber.setError("Please, enter 10 digit number");
             accountInfoPassed = false;
         }
@@ -64,7 +67,7 @@ public class RegisterActivity extends AppCompatActivity {
             mInputPassword.setError("Please, Enter 8 digit password");
             accountInfoPassed = false;
         }
-        if(accountInfoPassed)
+        if (accountInfoPassed)
             proceedSignUp();
     }
 
@@ -83,9 +86,30 @@ public class RegisterActivity extends AppCompatActivity {
         databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (!(snapshot.child("Users").child(phoneNumber).exists())){
+                if (!(snapshot.child("Users").child(phoneNumber).exists())) {
+                    HashMap<String, Object> userdataMap = new HashMap<>();
 
-                }else{
+                    userdataMap.put("phoneNumber", phoneNumber);
+                    userdataMap.put("password", password);
+                    userdataMap.put("name", name);
+
+                    databaseReference.child("Users").child(phoneNumber).updateChildren(userdataMap)
+                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if (task.isSuccessful()) {
+                                        Toast.makeText(RegisterActivity.this, "Congratulations, your account has been created", Toast.LENGTH_SHORT).show();
+                                        mLoadingbar.dismiss();
+
+                                        Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+                                        startActivity(intent);
+                                    } else {
+                                        Toast.makeText(RegisterActivity.this, "Please Check Your Connection!!!", Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+                            });
+
+                } else {
                     Toast.makeText(RegisterActivity.this, "The number " + phoneNumber + "is already registered.", Toast.LENGTH_SHORT).show();
                     mLoadingbar.dismiss();
                     Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
