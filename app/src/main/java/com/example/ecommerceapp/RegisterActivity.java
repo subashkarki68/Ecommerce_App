@@ -47,10 +47,10 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void createAccount() {
-        mName = mInputName.getText().toString();
+        mName = mInputName.getText().toString().trim();
         mPhoneNumber = mInputPhoneNumber.getText().toString();
         mPassword = mInputPassword.getText().toString();
-        Boolean accountInfoPassed = true;
+        boolean accountInfoPassed = true;
 
         if (TextUtils.isEmpty(mName)) {
             mInputName.setError("Name Can't be empty");
@@ -94,23 +94,21 @@ public class RegisterActivity extends AppCompatActivity {
                     userdataMap.put("name", name);
 
                     databaseReference.child("Users").child(phoneNumber).updateChildren(userdataMap)
-                            .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    if (task.isSuccessful()) {
-                                        Toast.makeText(RegisterActivity.this, "Congratulations, your account has been created", Toast.LENGTH_SHORT).show();
-                                        mLoadingbar.dismiss();
+                            .addOnCompleteListener(task -> {
+                                if (task.isSuccessful()) {
+                                    Toast.makeText(RegisterActivity.this, "Congratulations, your account has been created", Toast.LENGTH_SHORT).show();
+                                    mLoadingbar.dismiss();
 
-                                        Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
-                                        startActivity(intent);
-                                    } else {
-                                        Toast.makeText(RegisterActivity.this, "Please Check Your Connection!!!", Toast.LENGTH_SHORT).show();
-                                    }
+                                    Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+                                    startActivity(intent);
+                                } else {
+                                    Toast.makeText(RegisterActivity.this, "Please Check Your Connection!!!", Toast.LENGTH_SHORT).show();
+                                    mLoadingbar.dismiss();
                                 }
                             });
 
                 } else {
-                    Toast.makeText(RegisterActivity.this, "The number " + phoneNumber + "is already registered.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(RegisterActivity.this, "The number " + phoneNumber + " is already registered.", Toast.LENGTH_SHORT).show();
                     mLoadingbar.dismiss();
                     Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
                     startActivity(intent);
