@@ -16,6 +16,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.ecommerceapp.model.Users;
+import com.example.ecommerceapp.prevalent.UserCookie;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -24,11 +25,6 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 
 public class LoginActivity extends AppCompatActivity {
-
-    //For Shared Preferences
-    final String ACCOUNT_SETTINGS_SHARED_PREFERENCES = "Account_shared_preferences";
-    final String REMEMBER_ME_SHARED_PREFERENCE_KEY = "Remember_me_key";
-    final String USER_DETAIL_SHARED_PREFERENCE_KEY = "User_details_shared_preferences";
 
     private AppCompatButton mLoginButton;
     private EditText mInputPhoneNumber, mInputPassword;
@@ -48,7 +44,7 @@ public class LoginActivity extends AppCompatActivity {
         mInputPassword = findViewById(R.id.login_passwordInput);
         mRememberMe_chkb = findViewById(R.id.login_remember_me_chkb);
         mLoadingbar = new ProgressDialog(this);
-        mSharedPreferences = getSharedPreferences(ACCOUNT_SETTINGS_SHARED_PREFERENCES,MODE_PRIVATE);
+        mSharedPreferences = getSharedPreferences(UserCookie.ACCOUNT_SETTINGS_SHARED_PREFERENCES,MODE_PRIVATE);
 
         //Loading Bar
         mLoadingbar.setTitle("Logging in");
@@ -56,14 +52,14 @@ public class LoginActivity extends AppCompatActivity {
         mLoadingbar.setCancelable(false);
 
         //Check Previous Remember me Value
-        mSharedPreferences = getSharedPreferences(ACCOUNT_SETTINGS_SHARED_PREFERENCES,MODE_PRIVATE);
-        String rememberMeValue = mSharedPreferences.getString(REMEMBER_ME_SHARED_PREFERENCE_KEY,"");
+        mSharedPreferences = getSharedPreferences(UserCookie.ACCOUNT_SETTINGS_SHARED_PREFERENCES,MODE_PRIVATE);
+        String rememberMeValue = mSharedPreferences.getString(UserCookie.REMEMBER_ME_SHARED_PREFERENCE_KEY,"");
         if(rememberMeValue.equals("true")){
             //Loading bar
             mLoadingbar.show();
             //Retrive User Details
             Gson gson = new Gson();
-            String json = mSharedPreferences.getString(USER_DETAIL_SHARED_PREFERENCE_KEY,"");
+            String json = mSharedPreferences.getString(UserCookie.USER_DETAIL_SHARED_PREFERENCE_KEY,"");
             Users user = gson.fromJson(json,Users.class);
             mPhoneNumber = user.getPhoneNumber();
             mPassword = user.getPassword();
@@ -85,12 +81,12 @@ public class LoginActivity extends AppCompatActivity {
 
                 if(buttonView.isChecked()){
                     SharedPreferences.Editor editor = mSharedPreferences.edit();
-                    editor.putString(REMEMBER_ME_SHARED_PREFERENCE_KEY,"true");
+                    editor.putString(UserCookie.REMEMBER_ME_SHARED_PREFERENCE_KEY,"true");
                     editor.apply();
                     Toast.makeText(LoginActivity.this, "Checked", Toast.LENGTH_SHORT).show();
                 }else if(!buttonView.isChecked()){
                     SharedPreferences.Editor editor = mSharedPreferences.edit();
-                    editor.putString(REMEMBER_ME_SHARED_PREFERENCE_KEY,"false");
+                    editor.putString(UserCookie.REMEMBER_ME_SHARED_PREFERENCE_KEY,"false");
                     editor.apply();
                     Toast.makeText(LoginActivity.this, "Unchecked", Toast.LENGTH_SHORT).show();
                 }
@@ -167,7 +163,7 @@ public class LoginActivity extends AppCompatActivity {
         SharedPreferences.Editor editor = mSharedPreferences.edit();
         Gson gson = new Gson();
         String json = gson.toJson(user);
-        editor.putString(USER_DETAIL_SHARED_PREFERENCE_KEY,json);
+        editor.putString(UserCookie.USER_DETAIL_SHARED_PREFERENCE_KEY,json);
         editor.apply();
 
     }
