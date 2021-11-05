@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.ecommerceapp.databinding.ActivityRegisterBinding;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
@@ -23,22 +24,21 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.HashMap;
 
 public class RegisterActivity extends AppCompatActivity {
-    private AppCompatButton mCreateAccountButton;
-    private EditText mInputName, mInputPhoneNumber, mInputPassword;
+
+    ActivityRegisterBinding mBinding;
+
     private ProgressDialog mLoadingbar;
     private String mName, mPhoneNumber, mPassword;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_register);
-        mCreateAccountButton = findViewById(R.id.register_btn);
-        mInputName = findViewById(R.id.register_full_nameInput);
-        mInputPhoneNumber = findViewById(R.id.register_phoneNumberInput);
-        mInputPassword = findViewById(R.id.register_passwordInput);
+        mBinding = ActivityRegisterBinding.inflate(getLayoutInflater());
+        setContentView(mBinding.getRoot());
+
         mLoadingbar = new ProgressDialog(this);
 
-        mCreateAccountButton.setOnClickListener(new View.OnClickListener() {
+        mBinding.registerBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 createAccount();
@@ -47,24 +47,24 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void createAccount() {
-        mName = mInputName.getText().toString().trim();
-        mPhoneNumber = mInputPhoneNumber.getText().toString();
-        mPassword = mInputPassword.getText().toString();
+        mName = mBinding.registerFullNameInput.getText().toString().trim();
+        mPhoneNumber = mBinding.registerPhoneNumberInput.getText().toString();
+        mPassword = mBinding.registerPasswordInput.getText().toString();
         boolean accountInfoPassed = true;
 
         if (TextUtils.isEmpty(mName)) {
-            mInputName.setError("Name Can't be empty");
+            mBinding.registerFullNameInput.setError("Name Can't be empty");
             accountInfoPassed = false;
         }
         if (TextUtils.isEmpty(mPhoneNumber)) {
-            mInputPhoneNumber.setError("Please, Enter your Phone Number");
+            mBinding.registerPhoneNumberInput.setError("Please, Enter your Phone Number");
             accountInfoPassed = false;
         } else if (mPhoneNumber.length() < 10) {
-            mInputPhoneNumber.setError("Please, enter 10 digit number");
+            mBinding.registerPhoneNumberInput.setError("Please, enter 10 digit number");
             accountInfoPassed = false;
         }
         if (TextUtils.isEmpty(mPassword) || mPassword.length() < 8) {
-            mInputPassword.setError("Please, Enter 8 digit password");
+            mBinding.registerPasswordInput.setError("Please, Enter 8 digit password");
             accountInfoPassed = false;
         }
         if (accountInfoPassed)

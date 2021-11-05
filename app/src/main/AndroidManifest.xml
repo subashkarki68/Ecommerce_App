@@ -10,6 +10,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.EcommerceApp">
         <activity
+            android:name=".AdminPanelAddNewProductActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AdminPanelHomeActivity"
+            android:exported="false" />
+        <activity
             android:name=".HomeActivity"
             android:exported="false" />
         <activity

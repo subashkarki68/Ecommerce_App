@@ -4,17 +4,22 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 
+import android.app.ActionBar;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.ecommerceapp.databinding.ActivityLoginBinding;
 import com.example.ecommerceapp.model.Users;
 import com.example.ecommerceapp.prevalent.UserCookie;
 import com.google.firebase.database.DataSnapshot;
@@ -26,23 +31,20 @@ import com.google.gson.Gson;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private AppCompatButton mLoginButton;
-    private EditText mInputPhoneNumber, mInputPassword;
+    ActivityLoginBinding mBinding;
+
     private String mPhoneNumber, mPassword;
     private ProgressDialog mLoadingbar;
-    private CheckBox mRememberMe_chkb;
     private SharedPreferences mSharedPreferences;
+    private Dialog mAdminLoginDialog;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+        mBinding = ActivityLoginBinding.inflate(getLayoutInflater());
+        setContentView(mBinding.getRoot());
 
-        mLoginButton = findViewById(R.id.login_btn);
-        mInputPhoneNumber = findViewById(R.id.login_phoneNumberInput);
-        mInputPassword = findViewById(R.id.login_passwordInput);
-        mRememberMe_chkb = findViewById(R.id.login_remember_me_chkb);
         mLoadingbar = new ProgressDialog(this);
         mSharedPreferences = getSharedPreferences(UserCookie.ACCOUNT_SETTINGS_SHARED_PREFERENCES,MODE_PRIVATE);
 
@@ -68,14 +70,21 @@ public class LoginActivity extends AppCompatActivity {
             Toast.makeText(LoginActivity.this, "Not Logged in", Toast.LENGTH_SHORT).show();
         }
 
-        mLoginButton.setOnClickListener(new View.OnClickListener() {
+        mBinding.loginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 tryLogin();
             }
         });
 
-        mRememberMe_chkb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        mBinding.loginAdminBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                callAdminLoginDialog();
+            }
+        });
+
+        mBinding.loginRememberMeChkb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 
@@ -94,20 +103,46 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
+    private void callAdminLoginDialog() {
+        mAdminLoginDialog = new Dialog(this);
+        mAdminLoginDialog.setContentView(R.layout.activity_admin_login_form);
+        mAdminLoginDialog.setCancelable(true);
+        mAdminLoginDialog.show();
+        Window window = mAdminLoginDialog.getWindow();
+        window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        AppCompatButton adminLogin = mAdminLoginDialog.findViewById(R.id.adminLoginDialog_loginBtn);
+        EditText phoneNumber = mAdminLoginDialog.findViewById(R.id.adminLoginDialog_phoneNumberInput);
+        EditText password = mAdminLoginDialog.findViewById(R.id.adminLoginDialog_passwordInput);
+        adminLogin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(phoneNumber.getText().toString().equals("9800")
+                        && password.getText().toString().equals("admin")){
+                    Intent intent = new Intent(LoginActivity.this,AdminPanelHomeActivity.class);
+                    startActivity(intent);
+                    finishAffinity();
+                }else{
+                    Toast.makeText(LoginActivity.this, "Wrong Password", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+    }
+
     private void tryLogin() {
-        mPhoneNumber = mInputPhoneNumber.getText().toString();
-        mPassword = mInputPassword.getText().toString();
+        mPhoneNumber = mBinding.loginPhoneNumberInput.getText().toString();
+        mPassword = mBinding.loginPasswordInput.getText().toString();
         boolean accountInfoPassed = true;
 
         if (TextUtils.isEmpty(mPhoneNumber)) {
-            mInputPhoneNumber.setError("Please, Enter your Phone Number");
+            mBinding.loginPhoneNumberInput.setError("Please, Enter your Phone Number");
             accountInfoPassed = false;
         } else if (mPhoneNumber.length() < 10) {
-            mInputPhoneNumber.setError("Please, enter 10 digit number");
+            mBinding.loginPhoneNumberInput.setError("Please, enter 10 digit number");
             accountInfoPassed = false;
         }
         if (TextUtils.isEmpty(mPassword) || mPassword.length() < 8) {
-            mInputPassword.setError("Please, Enter 8 digit password");
+            mBinding.loginPasswordInput.setError("Please, Enter 8 digit password");
             accountInfoPassed = false;
         }
         if (accountInfoPassed) {
@@ -137,9 +172,10 @@ public class LoginActivity extends AppCompatActivity {
                                 startActivity(intent);
 
                                 putLoginCredentialsInSharedPreferences(user);
+                                finishAffinity();
 
                             }else{
-                                mInputPassword.setError("Password is Incorrect");
+                                mBinding.loginPasswordInput.setError("Password is Incorrect");
                                 mLoadingbar.dismiss();
                             }
                         }
@@ -164,7 +200,7 @@ public class LoginActivity extends AppCompatActivity {
         Gson gson = new Gson();
         String json = gson.toJson(user);
         editor.putString(UserCookie.USER_DETAIL_SHARED_PREFERENCE_KEY,json);
-        editor.apply();
+        editor.commit();
 
     }
 }
